@@ -1,0 +1,29 @@
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.9
+
+# UI
+gradio==4.44.0
+
+# 文字起こし
+faster-whisper==1.0.3
+
+# 動画・音声処理
+ffmpeg-python==0.2.0
+opencv-python-headless==4.10.0.84
+scenedetect[opencv]==0.6.4
+
+# OCR
+easyocr==1.7.1
+
+# HTTP（Ollama API呼び出し）
+httpx==0.27.0
+
+# 設定・ユーティリティ
+pyyaml==6.0.2
+python-dotenv==1.0.1
+aiofiles==23.2.1
+
+# データバリデーション
+pydantic==2.8.0

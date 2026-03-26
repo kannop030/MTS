@@ -1,0 +1,29 @@
+# アップロード・生成データ（個人情報保護）
+data/uploads/
+data/outputs/
+data/temp/
+data/models/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# 環境変数
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ログ
+*.log
+logs/

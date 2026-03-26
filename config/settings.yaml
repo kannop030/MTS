@@ -1,0 +1,33 @@
+whisper:
+  model: "small"          # tiny / base / small / medium / large
+  language: "ja"          # ja / en / auto
+  device: "cpu"
+  compute_type: "int8"    # CPU高速化
+
+scene_detect:
+  threshold: 30.0         # シーン変化感度（低いほど敏感）
+  min_scene_len: 15       # 最小シーン長（フレーム数）
+
+ocr:
+  languages: ["ja", "en"]
+  gpu: false
+
+ollama:
+  base_url: "http://ollama:11434"
+  model: "qwen2.5:3b"
+  timeout: 120
+  max_tokens: 4096
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+ui:
+  port: 7860
+
+storage:
+  upload_dir: "data/uploads"
+  output_dir: "data/outputs"
+  temp_dir: "data/temp"
+  max_upload_size_mb: 2048
+  delete_upload_on_success: true   # 処理正常終了後にアップロードファイルを削除

@@ -1,0 +1,5 @@
+# 使用Ollamaモデル定義
+# 初回起動時に以下のコマンドでDL:
+# docker compose run --rm ollama ollama pull qwen2.5:3b
+
+MODEL=qwen2.5:3b
