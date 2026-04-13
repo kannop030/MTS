@@ -31,3 +31,9 @@ storage:
   temp_dir: "data/temp"
   max_upload_size_mb: 2048
   delete_upload_on_success: true   # 処理正常終了後にアップロードファイルを削除
+
+watcher:
+  watch_dir: "data/watch"          # 監視フォルダ（ここにファイルを置くと自動処理）
+  language: "ja"                   # 文字起こし言語 (ja / en / auto)
+  enable_ocr: false                # スライドOCRを有効にする（動画のみ）
+  enable_minutes: false            # 要約・議事録生成を有効にする

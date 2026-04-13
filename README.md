@@ -8,6 +8,7 @@
 - 無料（有償API不使用）
 - Docker対応
 - 日本語対応
+- フォルダ監視モード対応（ファイルを置くだけで自動処理）
 
 ## ドキュメント
 
@@ -20,13 +21,31 @@
 | [04_pipeline_spec](docs/spec/04_pipeline_spec.md) | 処理パイプライン仕様 |
 | [05_data_schema](docs/spec/05_data_schema.md) | 入出力データ仕様 |
 
-## 起動方法（構築後）
+## 起動方法
+
+### Web UI モード（通常）
 
 ```bash
 docker compose up
 ```
 
 ブラウザで `http://localhost:7860` にアクセス。
+
+### フォルダ監視モード
+
+```bash
+# 基本起動（設定は config/settings.yaml から読み込み）
+python scripts/watch.py
+
+# オプション指定
+python scripts/watch.py --language en --ocr --minutes
+
+# 監視フォルダを変更
+python scripts/watch.py --watch-dir /path/to/folder
+```
+
+`data/watch/` にファイルを置くと自動で処理が始まり、結果は `data/outputs/` に保存されます。
+処理が正常完了したファイルは自動で削除されます。失敗した場合は `data/watch/failed/` に移動します。
 
 ## 技術スタック
 - 文字起こし: faster-whisper
@@ -35,3 +54,4 @@ docker compose up
 - 要約・議事録: Ollama (qwen2.5:3b)
 - Web UI: Gradio
 - API: FastAPI
+- フォルダ監視: watchdog
