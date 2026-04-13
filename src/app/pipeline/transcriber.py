@@ -54,7 +54,7 @@ class Transcriber:
         output_path.write_text("\n".join(lines), encoding="utf-8")
         logger.info(f"文字起こし保存: {output_path}")
 
-    def run(self, input_path: Path, job_dirs: dict, language: str = None) -> Path:
+    def run(self, input_path: Path, job_dirs: dict, language: str = None, filename_stem: str = "") -> Path:
         if language:
             self.language = language
 
@@ -68,7 +68,8 @@ class Transcriber:
             raise ValueError(f"非対応のファイル形式: {suffix}")
 
         segments = self.transcribe(audio_path)
-        output_path = job_dirs["output"] / "transcript.txt"
+        name = f"{filename_stem}_transcript.txt" if filename_stem else "transcript.txt"
+        output_path = job_dirs["output"] / name
         self.save(segments, output_path)
         return output_path
 

@@ -6,25 +6,29 @@
 data/
 ├── uploads/
 │   └── {job_id}/
-│       └── {original_filename}       # アップロードファイル（処理完了後に自動削除）
+│       └── {original_filename}                        # アップロードファイル（処理完了後に自動削除）
 │
 ├── outputs/
 │   └── {job_id}/
-│       ├── transcript.txt            # 文字起こし（タイムスタンプ付き）
+│       ├── {filename_stem}_transcript.txt             # 文字起こし（タイムスタンプ付き）
 │       ├── slides/
-│       │   ├── slide_001.png         # 抽出スライド画像
+│       │   ├── slide_001.png                          # 抽出スライド画像
 │       │   ├── slide_002.png
 │       │   └── ...
-│       ├── slides_text.txt           # スライドOCRテキスト
-│       ├── summary.md                # 要約
-│       ├── minutes.md                # 議事録
-│       └── metadata.json            # ジョブメタデータ
+│       ├── {filename_stem}_slides_text.txt            # スライドOCRテキスト
+│       ├── {filename_stem}_summary.md                 # 要約
+│       ├── {filename_stem}_minutes.md                 # 議事録
+│       └── metadata.json                              # ジョブメタデータ
 │
 └── temp/
     └── {job_id}/
-        ├── audio.wav                 # 抽出音声（処理後削除）
-        └── frames/                   # 一時フレーム（処理後削除）
+        ├── audio.wav                                  # 抽出音声（処理後削除）
+        └── frames/                                    # 一時フレーム（処理後削除）
 ```
+
+> `{filename_stem}` はアップロードファイルのファイル名（拡張子なし）をサニタイズしたもの。  
+> 日本語ファイル名はそのまま保持されます（例: `会議録_2024年4月` → `会議録_2024年4月_transcript.txt`）。  
+> パスに使用できない文字（`<>:"/\|?*` 等）は `_` に置換されます。
 
 ---
 
@@ -43,14 +47,14 @@ data/
 
 ## ファイル仕様
 
-### transcript.txt
+### {filename_stem}_transcript.txt
 ```
 [HH:MM:SS --> HH:MM:SS] テキスト内容
 [00:00:05 --> 00:00:12] こんにちは、本日の会議を始めます。
 [00:00:13 --> 00:00:20] 最初のアジェンダは先週の振り返りです。
 ```
 
-### slides_text.txt
+### {filename_stem}_slides_text.txt
 ```
 --- slide_001.png ---
 スライドタイトル
@@ -61,7 +65,7 @@ data/
 次のスライドの内容
 ```
 
-### summary.md
+### {filename_stem}_summary.md
 ```markdown
 # 要約
 
@@ -76,7 +80,7 @@ data/
 - ポイント1
 ```
 
-### minutes.md
+### {filename_stem}_minutes.md
 ```markdown
 # 議事録
 

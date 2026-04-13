@@ -10,7 +10,7 @@ class Transcriber:
     def extract_audio(self, input_path: str, output_path: str) -> str
     def transcribe(self, audio_path: str, language: str) -> list[Segment]
     def save(self, segments: list[Segment], output_path: str) -> None
-    def run(self, input_path: str, job_dir: str, language: str) -> str
+    def run(self, input_path: str, job_dir: str, language: str, filename_stem: str = "") -> str
 ```
 
 ## 処理フロー
@@ -29,7 +29,7 @@ class Transcriber:
               タイムスタンプ付きテキスト生成
                      │
                      ▼
-              transcript.txt に保存
+              {filename_stem}_transcript.txt に保存
 ```
 
 ## 依存ライブラリ

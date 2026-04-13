@@ -12,7 +12,7 @@ class Extractor:
     def save_slides(self, frame_paths: list[str], scene_frames: list[int], output_dir: str) -> list[str]
     def run_ocr(self, image_paths: list[str]) -> dict[str, str]
     def save_slides_text(self, ocr_results: dict, output_path: str) -> None
-    def run(self, video_path: str, job_dir: str) -> tuple[list[str], str]
+    def run(self, video_path: str, job_dir: str, filename_stem: str = "") -> tuple[list[str], str]
 ```
 
 ## 処理フロー
@@ -31,7 +31,7 @@ OpenCV で代表フレームを抽出・保存
 EasyOCR で各スライド画像のテキスト認識
     │
     ▼
-slides_text.txt に保存
+{filename_stem}_slides_text.txt に保存
 ```
 
 ## 依存ライブラリ

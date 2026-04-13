@@ -22,7 +22,7 @@ from app.pipeline.summarizer import Summarizer
 from app.pipeline.transcriber import Transcriber
 from app.utils.file_handler import (
     load_settings, generate_job_id, create_job_dirs,
-    delete_upload, delete_temp, zip_output,
+    delete_upload, delete_temp, zip_output, sanitize_filename,
 )
 from app.utils.logger import get_logger
 
@@ -70,6 +70,8 @@ async def upload(
     content = await file.read()
     upload_path.write_bytes(content)
 
+    filename_stem = sanitize_filename(file.filename)
+
     _jobs[job_id] = {
         "status": "queued",
         "progress": 0,
@@ -77,6 +79,7 @@ async def upload(
         "steps": StepStatus().model_dump(),
         "error": None,
         "filename": file.filename,
+        "filename_stem": filename_stem,
         "upload_path": str(upload_path),
         "job_dirs": {k: str(v) for k, v in job_dirs.items()},
         "language": language,
@@ -117,28 +120,38 @@ async def get_result(job_id: str):
 
     output_dir = Path(job["job_dirs"]["output"])
     slides_dir = output_dir / "slides"
+    prefix = f"{job.get('filename_stem', '')}_" if job.get("filename_stem") else ""
 
     files = ResultFiles(
-        transcript   = _rel(output_dir / "transcript.txt"),
+        transcript   = _rel(output_dir / f"{prefix}transcript.txt"),
         slides       = [_rel(p) for p in sorted(slides_dir.glob("*.png"))] if slides_dir.exists() else [],
-        slides_text  = _rel(output_dir / "slides_text.txt"),
-        summary      = _rel(output_dir / "summary.md"),
-        minutes      = _rel(output_dir / "minutes.md"),
+        slides_text  = _rel(output_dir / f"{prefix}slides_text.txt"),
+        summary      = _rel(output_dir / f"{prefix}summary.md"),
+        minutes      = _rel(output_dir / f"{prefix}minutes.md"),
     )
     return JobResult(job_id=job_id, status="completed", files=files)
 
 
 @app.get("/api/download/{job_id}")
 async def download(job_id: str):
+    import urllib.parse
     job = _get_job(job_id)
     if job["status"] != "completed":
         raise HTTPException(status_code=400, detail="処理が完了していません")
 
-    zip_path = zip_output(job_id, settings)
-    return FileResponse(
-        path=str(zip_path),
+    filename_stem = job.get("filename_stem", "")
+    zip_path = zip_output(job_id, settings, filename_stem)
+    download_name = f"{filename_stem}_result.zip" if filename_stem else f"{job_id}_result.zip"
+    encoded_name = urllib.parse.quote(download_name, safe="")
+    from fastapi.responses import Response
+    with open(str(zip_path), "rb") as f:
+        data = f.read()
+    return Response(
+        content=data,
         media_type="application/zip",
-        filename=f"{job_id}_result.zip",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_name}",
+        },
     )
 
 
@@ -177,6 +190,7 @@ async def _run_pipeline(job_id: str):
     enable_ocr = job["enable_ocr"]
     enable_minutes = job["enable_minutes"]
     language = job["language"]
+    filename_stem = job.get("filename_stem", "")
 
     try:
         suffix = input_path.suffix.lower()
@@ -188,7 +202,7 @@ async def _run_pipeline(job_id: str):
             None, Transcriber, settings
         )
         await asyncio.get_event_loop().run_in_executor(
-            None, transcriber.run, input_path, job_dirs, language
+            None, transcriber.run, input_path, job_dirs, language, filename_stem
         )
         _jobs[job_id]["steps"]["transcribing"] = "completed"
         _jobs[job_id]["progress"] = 40
@@ -200,7 +214,7 @@ async def _run_pipeline(job_id: str):
                 None, Extractor, settings
             )
             await asyncio.get_event_loop().run_in_executor(
-                None, extractor.run, input_path, job_dirs
+                None, extractor.run, input_path, job_dirs, filename_stem
             )
             _jobs[job_id]["steps"]["extracting"] = "completed"
             _jobs[job_id]["progress"] = 70
@@ -214,7 +228,7 @@ async def _run_pipeline(job_id: str):
                 None, Summarizer, settings
             )
             await asyncio.get_event_loop().run_in_executor(
-                None, summarizer.run, job_dirs
+                None, summarizer.run, job_dirs, filename_stem
             )
             _jobs[job_id]["steps"]["summarizing"] = "completed"
             _jobs[job_id]["steps"]["minutes"] = "completed"

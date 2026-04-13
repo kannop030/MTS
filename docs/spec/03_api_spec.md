@@ -74,11 +74,11 @@ enable_minutes  : 要約・議事録を生成するか（任意, デフォルト
   "job_id": "abc123",
   "status": "completed",
   "files": {
-    "transcript": "outputs/abc123/transcript.txt",
+    "transcript": "outputs/abc123/会議録_transcript.txt",
     "slides": ["outputs/abc123/slides/slide_001.png"],
-    "slides_text": "outputs/abc123/slides_text.txt",
-    "summary": "outputs/abc123/summary.md",
-    "minutes": "outputs/abc123/minutes.md"
+    "slides_text": "outputs/abc123/会議録_slides_text.txt",
+    "summary": "outputs/abc123/会議録_summary.md",
+    "minutes": "outputs/abc123/会議録_minutes.md"
   }
 }
 ```
@@ -91,8 +91,11 @@ enable_minutes  : 要約・議事録を生成するか（任意, デフォルト
 **レスポンス**
 ```
 Content-Type: application/zip
-Content-Disposition: attachment; filename="abc123_result.zip"
+Content-Disposition: attachment; filename*=UTF-8''%E4%BC%9A%E8%AD%B0%E9%8C%B2_result.zip
 ```
+
+> ファイル名はアップロードファイルのstem（拡張子なし）を使用します。  
+> 日本語ファイル名はRFC 5987形式（`filename*=UTF-8''...`）でエンコードされるため、主要ブラウザで正しく表示されます。
 
 ---
 

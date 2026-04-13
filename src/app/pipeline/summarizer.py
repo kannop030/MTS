@@ -131,19 +131,20 @@ class Summarizer:
         prompt = MINUTES_PROMPT.format(summary=summary)
         return self._call_ollama(prompt)
 
-    def run(self, job_dirs: dict) -> tuple[Path, Path]:
-        transcript_path  = job_dirs["output"] / "transcript.txt"
-        slides_text_path = job_dirs["output"] / "slides_text.txt"
+    def run(self, job_dirs: dict, filename_stem: str = "") -> tuple[Path, Path]:
+        prefix = f"{filename_stem}_" if filename_stem else ""
+        transcript_path  = job_dirs["output"] / f"{prefix}transcript.txt"
+        slides_text_path = job_dirs["output"] / f"{prefix}slides_text.txt"
 
         logger.info("要約生成中")
         summary = self.generate_summary(transcript_path, slides_text_path)
-        summary_path = job_dirs["output"] / "summary.md"
+        summary_path = job_dirs["output"] / f"{prefix}summary.md"
         summary_path.write_text(summary, encoding="utf-8")
         logger.info(f"要約保存: {summary_path}")
 
         logger.info("議事録生成中")
         minutes = self.generate_minutes(summary)
-        minutes_path = job_dirs["output"] / "minutes.md"
+        minutes_path = job_dirs["output"] / f"{prefix}minutes.md"
         minutes_path.write_text(minutes, encoding="utf-8")
         logger.info(f"議事録保存: {minutes_path}")
 

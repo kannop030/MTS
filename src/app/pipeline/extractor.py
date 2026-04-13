@@ -74,7 +74,7 @@ class Extractor:
         output_path.write_text("\n".join(lines), encoding="utf-8")
         logger.info(f"スライドテキスト保存: {output_path}")
 
-    def run(self, video_path: Path, job_dirs: dict) -> tuple[list[Path], Path]:
+    def run(self, video_path: Path, job_dirs: dict, filename_stem: str = "") -> tuple[list[Path], Path]:
         frame_numbers = self.detect_scenes(video_path)
 
         if not frame_numbers:
@@ -84,7 +84,8 @@ class Extractor:
         slides = self.extract_slides(video_path, frame_numbers, job_dirs["slides"])
         ocr_results = self.run_ocr(slides)
 
-        text_path = job_dirs["output"] / "slides_text.txt"
+        name = f"{filename_stem}_slides_text.txt" if filename_stem else "slides_text.txt"
+        text_path = job_dirs["output"] / name
         self.save_slides_text(ocr_results, text_path)
 
         return slides, text_path

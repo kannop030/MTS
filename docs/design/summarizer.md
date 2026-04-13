@@ -12,13 +12,13 @@ class Summarizer:
     def call_ollama(self, prompt: str) -> str
     def generate_summary(self, transcript_path: str, slides_text_path: str) -> str
     def generate_minutes(self, summary: str) -> str
-    def run(self, job_dir: str) -> tuple[str, str]
+    def run(self, job_dir: str, filename_stem: str = "") -> tuple[str, str]
 ```
 
 ## 処理フロー
 
 ```
-transcript.txt + slides_text.txt
+{filename_stem}_transcript.txt + {filename_stem}_slides_text.txt
     │
     ▼
 プロンプト構築（要約用）
@@ -27,7 +27,7 @@ transcript.txt + slides_text.txt
 Ollama API 呼び出し（qwen2.5:3b）
     │
     ▼
-summary.md 保存
+{filename_stem}_summary.md 保存
     │
     ▼
 プロンプト構築（議事録用）
@@ -36,7 +36,7 @@ summary.md 保存
 Ollama API 呼び出し
     │
     ▼
-minutes.md 保存
+{filename_stem}_minutes.md 保存
 ```
 
 ## プロンプトテンプレート

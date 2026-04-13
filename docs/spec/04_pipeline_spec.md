@@ -48,7 +48,7 @@
 - **ツール**: faster-whisper
 - **モデル**: `small`（CPU環境での速度・精度バランス）
 - **入力**: `temp/audio.wav`
-- **出力**: `outputs/{job_id}/transcript.txt`
+- **出力**: `outputs/{job_id}/{filename_stem}_transcript.txt`
 - **出力形式**:
   ```
   [00:00:05 --> 00:00:12] こんにちは、本日の会議を始めます。
@@ -78,7 +78,7 @@
 - **ツール**: EasyOCR
 - **言語**: `['ja', 'en']`
 - **入力**: `outputs/{job_id}/slides/*.png`
-- **出力**: `outputs/{job_id}/slides_text.txt`
+- **出力**: `outputs/{job_id}/{filename_stem}_slides_text.txt`
 - **出力形式**:
   ```
   --- slide_001.png ---
@@ -92,7 +92,7 @@
 ### ステップ6: 要約生成
 - **ツール**: Ollama API
 - **モデル**: `qwen2.5:3b`
-- **入力**: transcript.txt + slides_text.txt
+- **入力**: `{filename_stem}_transcript.txt` + `{filename_stem}_slides_text.txt`
 - **処理方式**: 文字起こしが3000文字を超える場合、チャンク処理を行う
   1. 文字起こしを3000文字ごとに分割
   2. 各チャンクをOllamaで個別に要約（箇条書き）
@@ -105,14 +105,14 @@
   ## スライド内容（参考）    ← slides_text.txt の先頭2000文字
   {slides_text}
   ```
-- **出力**: `outputs/{job_id}/summary.md`
+- **出力**: `outputs/{job_id}/{filename_stem}_summary.md`
 
 ---
 
 ### ステップ7: 議事録生成
 - **ツール**: Ollama API
 - **モデル**: `qwen2.5:3b`
-- **入力**: summary.md
+- **入力**: `{filename_stem}_summary.md`
 - **出力形式**:
   ```markdown
   # 議事録
@@ -123,7 +123,7 @@
   ## 決定事項
   ## TODO・アクションアイテム
   ```
-- **出力**: `outputs/{job_id}/minutes.md`
+- **出力**: `outputs/{job_id}/{filename_stem}_minutes.md`
 
 ---
 
