@@ -176,16 +176,15 @@ async def _run_pipeline(job_id: str):
     language = job["language"]
 
     try:
-        transcriber = Transcriber(settings)
-        extractor   = Extractor(settings)
-        summarizer  = Summarizer(settings)
-
         suffix = input_path.suffix.lower()
         is_video = suffix in {".mp4", ".mkv", ".avi", ".mov"}
 
         # ステップ1: 文字起こし
         if mode in ("transcribe_only", "full"):
             _update(job_id, "transcribing", 10, "in_progress")
+            transcriber = await asyncio.get_event_loop().run_in_executor(
+                None, Transcriber, settings
+            )
             await asyncio.get_event_loop().run_in_executor(
                 None, transcriber.run, input_path, job_dirs, language
             )
@@ -197,6 +196,9 @@ async def _run_pipeline(job_id: str):
         # ステップ2: スライド抽出（動画のみ）
         if mode in ("extract_only", "full") and is_video:
             _update(job_id, "extracting", 50, "in_progress")
+            extractor = await asyncio.get_event_loop().run_in_executor(
+                None, Extractor, settings
+            )
             await asyncio.get_event_loop().run_in_executor(
                 None, extractor.run, input_path, job_dirs
             )
@@ -208,6 +210,9 @@ async def _run_pipeline(job_id: str):
         # ステップ3: 要約・議事録
         if mode == "full":
             _update(job_id, "summarizing", 75, "in_progress")
+            summarizer = await asyncio.get_event_loop().run_in_executor(
+                None, Summarizer, settings
+            )
             await asyncio.get_event_loop().run_in_executor(
                 None, summarizer.run, job_dirs
             )
@@ -231,6 +236,15 @@ async def _run_pipeline(job_id: str):
 
 
 if __name__ == "__main__":
+    import threading
+    from app.ui.gradio_app import demo
+
+    def run_gradio():
+        demo.launch(server_name="0.0.0.0", server_port=7860, prevent_thread_lock=True)
+
+    t = threading.Thread(target=run_gradio, daemon=True)
+    t.start()
+
     uvicorn.run(
         "app.main:app",
         host=settings["server"]["host"],

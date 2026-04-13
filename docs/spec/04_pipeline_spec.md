@@ -90,12 +90,16 @@
 - **ツール**: Ollama API
 - **モデル**: `qwen2.5:3b`
 - **入力**: transcript.txt + slides_text.txt
+- **処理方式**: 文字起こしが3000文字を超える場合、チャンク処理を行う
+  1. 文字起こしを3000文字ごとに分割
+  2. 各チャンクをOllamaで個別に要約（箇条書き）
+  3. 全チャンクの要約 + スライド内容（先頭2000文字）を合わせて最終要約を生成
+- **優先度**: 文字起こしを主軸とし、スライドは参考情報として扱う
 - **プロンプト構造**:
   ```
-  以下の文字起こしとスライド内容から要点をまとめてください。
-  ## 文字起こし
-  {transcript}
-  ## スライド内容
+  ## 文字起こしの要点        ← チャンク要約の結果
+  {transcript_summary}
+  ## スライド内容（参考）    ← slides_text.txt の先頭2000文字
   {slides_text}
   ```
 - **出力**: `outputs/{job_id}/summary.md`
@@ -136,7 +140,8 @@ ocr:
 ollama:
   base_url: "http://ollama:11434"
   model: "qwen2.5:3b"
-  timeout: 120
+  timeout: 3600   # 60分（長い文字起こしのチャンク処理に対応）
+  max_tokens: 4096
 
 output:
   format: "markdown"

@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# CPU版PyTorchを先にインストール（easyocrがCUDA版を引き込まないように）
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
 # 依存パッケージインストール
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -20,6 +23,9 @@ COPY config/ ./config/
 
 # データディレクトリ作成
 RUN mkdir -p data/uploads data/outputs data/temp
+
+# Pythonモジュールパス設定
+ENV PYTHONPATH=/app/src
 
 EXPOSE 8000 7860
 

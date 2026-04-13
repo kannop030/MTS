@@ -7,7 +7,7 @@ from pathlib import Path
 import gradio as gr
 import httpx
 
-API_BASE = "http://localhost:8000"
+API_BASE = "http://127.0.0.1:8000"
 
 
 def process_file(file_obj, language: str, mode: str) -> tuple:
@@ -22,7 +22,7 @@ def process_file(file_obj, language: str, mode: str) -> tuple:
             f"{API_BASE}/api/upload",
             files={"file": (filename, f)},
             data={"language": language, "mode": mode},
-            timeout=30,
+            timeout=120,
         )
 
     if resp.status_code != 200:
@@ -30,8 +30,9 @@ def process_file(file_obj, language: str, mode: str) -> tuple:
 
     job_id = resp.json()["job_id"]
 
-    # 処理完了まで待機
-    for _ in range(600):
+    # 処理完了まで待機（最大6時間）
+    status = "processing"
+    for _ in range(7200):
         time.sleep(3)
         status_resp = httpx.get(f"{API_BASE}/api/status/{job_id}", timeout=10)
         data = status_resp.json()
@@ -46,6 +47,10 @@ def process_file(file_obj, language: str, mode: str) -> tuple:
         if status == "failed":
             yield f"エラー: {data.get('error', '不明なエラー')}", None, None, None, None, None
             return
+
+    if status != "completed":
+        yield "タイムアウト: 処理が完了しませんでした", None, None, None, None, None
+        return
 
     # 結果取得
     result_resp = httpx.get(f"{API_BASE}/api/result/{job_id}", timeout=10)
