@@ -59,7 +59,8 @@ async def health():
 async def upload(
     file: UploadFile = File(...),
     language: str = Form("ja"),
-    mode: str = Form("full"),
+    enable_ocr: str = Form("false"),
+    enable_minutes: str = Form("false"),
 ):
     job_id = generate_job_id()
     job_dirs = create_job_dirs(job_id, settings)
@@ -79,7 +80,8 @@ async def upload(
         "upload_path": str(upload_path),
         "job_dirs": {k: str(v) for k, v in job_dirs.items()},
         "language": language,
-        "mode": mode,
+        "enable_ocr": enable_ocr.lower() in ("true", "1", "yes"),
+        "enable_minutes": enable_minutes.lower() in ("true", "1", "yes"),
         "created_at": datetime.now().isoformat(),
     }
 
@@ -172,29 +174,27 @@ async def _run_pipeline(job_id: str):
     job = _jobs[job_id]
     job_dirs = {k: Path(v) for k, v in job["job_dirs"].items()}
     input_path = Path(job["upload_path"])
-    mode = job["mode"]
+    enable_ocr = job["enable_ocr"]
+    enable_minutes = job["enable_minutes"]
     language = job["language"]
 
     try:
         suffix = input_path.suffix.lower()
         is_video = suffix in {".mp4", ".mkv", ".avi", ".mov"}
 
-        # ステップ1: 文字起こし
-        if mode in ("transcribe_only", "full"):
-            _update(job_id, "transcribing", 10, "in_progress")
-            transcriber = await asyncio.get_event_loop().run_in_executor(
-                None, Transcriber, settings
-            )
-            await asyncio.get_event_loop().run_in_executor(
-                None, transcriber.run, input_path, job_dirs, language
-            )
-            _jobs[job_id]["steps"]["transcribing"] = "completed"
-            _jobs[job_id]["progress"] = 40
-        else:
-            _jobs[job_id]["steps"]["transcribing"] = "skipped"
+        # ステップ1: 文字起こし（必須）
+        _update(job_id, "transcribing", 10, "in_progress")
+        transcriber = await asyncio.get_event_loop().run_in_executor(
+            None, Transcriber, settings
+        )
+        await asyncio.get_event_loop().run_in_executor(
+            None, transcriber.run, input_path, job_dirs, language
+        )
+        _jobs[job_id]["steps"]["transcribing"] = "completed"
+        _jobs[job_id]["progress"] = 40
 
-        # ステップ2: スライド抽出（動画のみ）
-        if mode in ("extract_only", "full") and is_video:
+        # ステップ2: スライド抽出（動画かつOCR有効の場合のみ）
+        if enable_ocr and is_video:
             _update(job_id, "extracting", 50, "in_progress")
             extractor = await asyncio.get_event_loop().run_in_executor(
                 None, Extractor, settings
@@ -207,8 +207,8 @@ async def _run_pipeline(job_id: str):
         else:
             _jobs[job_id]["steps"]["extracting"] = "skipped"
 
-        # ステップ3: 要約・議事録
-        if mode == "full":
+        # ステップ3: 要約・議事録（議事録有効の場合のみ）
+        if enable_minutes:
             _update(job_id, "summarizing", 75, "in_progress")
             summarizer = await asyncio.get_event_loop().run_in_executor(
                 None, Summarizer, settings
@@ -218,7 +218,9 @@ async def _run_pipeline(job_id: str):
             )
             _jobs[job_id]["steps"]["summarizing"] = "completed"
             _jobs[job_id]["steps"]["minutes"] = "completed"
-            _jobs[job_id]["progress"] = 100
+        else:
+            _jobs[job_id]["steps"]["summarizing"] = "skipped"
+            _jobs[job_id]["steps"]["minutes"] = "skipped"
 
         # 正常完了 → アップロードファイル削除
         _jobs[job_id]["status"] = "completed"

@@ -10,7 +10,7 @@ import httpx
 API_BASE = "http://127.0.0.1:8000"
 
 
-def process_file(file_obj, language: str, mode: str) -> tuple:
+def process_file(file_obj, language: str, enable_ocr: bool, enable_minutes: bool) -> tuple:
     if file_obj is None:
         return "ファイルを選択してください", None, None, None, None, None
 
@@ -21,7 +21,11 @@ def process_file(file_obj, language: str, mode: str) -> tuple:
         resp = httpx.post(
             f"{API_BASE}/api/upload",
             files={"file": (filename, f)},
-            data={"language": language, "mode": mode},
+            data={
+                "language": language,
+                "enable_ocr": str(enable_ocr).lower(),
+                "enable_minutes": str(enable_minutes).lower(),
+            },
             timeout=120,
         )
 
@@ -87,10 +91,14 @@ with gr.Blocks(title="Media Transcriber") as demo:
                 value="ja",
                 label="言語",
             )
-            mode = gr.Dropdown(
-                choices=["full", "transcribe_only", "extract_only"],
-                value="full",
-                label="処理モード",
+            gr.Markdown("**処理オプション**（文字起こしは常に実行されます）")
+            enable_ocr = gr.Checkbox(
+                label="OCR（スライド抽出）を実行する",
+                value=False,
+            )
+            enable_minutes = gr.Checkbox(
+                label="要約・議事録を生成する",
+                value=False,
             )
             run_btn = gr.Button("処理開始", variant="primary")
             status_box = gr.Textbox(label="ステータス", interactive=False)
@@ -110,7 +118,7 @@ with gr.Blocks(title="Media Transcriber") as demo:
 
     run_btn.click(
         fn=process_file,
-        inputs=[file_input, language, mode],
+        inputs=[file_input, language, enable_ocr, enable_minutes],
         outputs=[status_box, transcript_out, slides_out, summary_out, minutes_out, download_link],
     )
 

@@ -38,7 +38,7 @@
 
 ### Gradio Web UI
 - ファイルアップロード
-- 処理オプション選択
+- 処理オプション選択（文字起こしは必須・OCR/要約議事録はチェックボックスで任意選択）
 - 進捗表示
 - 結果プレビューとダウンロード
 
@@ -77,20 +77,24 @@ services:
 入力ファイル
     │
     ▼
-[uploads/] ──────────────────────────────┐
+[uploads/]
+    │
+    ▼
+Transcriber【必須】
+    │
+    ▼
+transcript.txt
+    │
+    ├─ enable_ocr=true かつ動画 ──► Extractor【任意】
     │                                    │
-    ▼                                    ▼
-Transcriber                          Extractor
+    │                             slides/*.png
+    │                             slides_text.txt
     │                                    │
-    ▼                                    ▼
-transcript.txt                  slides/*.png
-                                slides_text.txt
-    │                                    │
-    └──────────────┬─────────────────────┘
-                   ▼
-              Summarizer
-                   │
-         ┌─────────┴──────────┐
-         ▼                    ▼
-     summary.md          minutes.md
+    ├─ enable_minutes=true ──────────────┴──► Summarizer【任意】
+    │                                              │
+    │                                    ┌─────────┴──────────┐
+    │                                    ▼                    ▼
+    │                                summary.md          minutes.md
+    │
+    └──► 出力（transcript.txt は常に生成）
 ```

@@ -103,6 +103,8 @@ data/
   "filename": "meeting.mp4",
   "file_type": "video",
   "language": "ja",
+  "enable_ocr": true,
+  "enable_minutes": true,
   "status": "completed",
   "created_at": "2026-03-26T10:00:00",
   "completed_at": "2026-03-26T10:15:00",
@@ -111,6 +113,8 @@ data/
   "upload_deleted": true
 }
 ```
+
+> `enable_ocr` / `enable_minutes` が `false` の場合、対応するステップは `skipped` になり出力ファイルは生成されません。
 
 ---
 

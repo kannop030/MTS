@@ -14,11 +14,15 @@
 ```
 Content-Type: multipart/form-data
 
-file        : アップロードファイル（必須）
-language    : 言語コード（任意, デフォルト: "ja"）
-mode        : 処理モード（任意, デフォルト: "full"）
-              "transcribe_only" | "extract_only" | "full"
+file            : アップロードファイル（必須）
+language        : 言語コード（任意, デフォルト: "ja"）
+enable_ocr      : OCR（スライド抽出）を実行するか（任意, デフォルト: "false"）
+                  "true" | "false"
+enable_minutes  : 要約・議事録を生成するか（任意, デフォルト: "false"）
+                  "true" | "false"
 ```
+
+> **文字起こしは常に実行されます。** `enable_ocr` と `enable_minutes` はそれぞれ独立してオン/オフを指定できます。`enable_ocr` は動画ファイルの場合のみ有効です。
 
 **レスポンス**
 ```json
