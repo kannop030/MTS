@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # ソースコードコピー
 COPY src/ ./src/
+COPY scripts/ ./scripts/
 COPY config/ ./config/
 
 # データディレクトリ作成

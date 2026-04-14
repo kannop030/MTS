@@ -7,10 +7,10 @@ python-multipart==0.0.9
 gradio==4.44.0
 huggingface_hub==0.25.2
 
-# 文字起こし
+# Transcription
 faster-whisper==1.0.3
 
-# 動画・音声処理
+# Video/Audio processing
 ffmpeg-python==0.2.0
 opencv-python-headless==4.10.0.84
 scenedetect==0.6.4
@@ -18,17 +18,17 @@ scenedetect==0.6.4
 # OCR
 easyocr==1.7.1
 
-# HTTP（Ollama API呼び出し・faster-whisper依存）
+# HTTP
 httpx==0.27.0
 requests==2.32.3
 
-# 設定・ユーティリティ
+# Config/Utilities
 pyyaml==6.0.2
 python-dotenv==1.0.1
 aiofiles==23.2.1
 
-# フォルダ監視
+# Folder watching
 watchdog==4.0.1
 
-# データバリデーション
+# Data validation
 pydantic==2.8.0

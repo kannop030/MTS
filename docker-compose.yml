@@ -16,6 +16,21 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  watcher:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["python", "scripts/watch.py"]
+
   ollama:
     image: ollama/ollama:latest
     ports:
