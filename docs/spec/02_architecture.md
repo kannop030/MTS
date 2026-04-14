@@ -69,6 +69,12 @@
 - 処理失敗時: `data/watch/failed/` へ移動
 - `scripts/watch.py` から起動（FastAPI サーバー不要）
 
+### Logger（ログ管理）
+- コンソールとファイルの両方に出力する
+- `TimedRotatingFileHandler` で日次ローテーション（`logs/media_transcriber.log.YYYY-MM-DD`）
+- 起動時に 90 日より古いログファイルを自動削除する
+- 設定は `config/settings.yaml` の `logging` セクションで管理する
+
 ## Docker構成
 
 ```yaml

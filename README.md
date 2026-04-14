@@ -47,6 +47,21 @@ python scripts/watch.py --watch-dir /path/to/folder
 `data/watch/` にファイルを置くと自動で処理が始まり、結果は `data/outputs/` に保存されます。
 処理が正常完了したファイルは自動で削除されます。失敗した場合は `data/watch/failed/` に移動します。
 
+## ログ
+
+アプリ起動時に `logs/media_transcriber.log` へ自動出力されます。
+ログは日次でローテーションされ、90日（3か月）を超えたファイルは起動時に自動削除されます。
+
+設定は `config/settings.yaml` の `logging` セクションで変更できます。
+
+```yaml
+logging:
+  log_dir: "logs"                   # 出力ディレクトリ
+  log_file: "media_transcriber.log" # ファイル名
+  log_level: "INFO"                 # ログレベル (DEBUG / INFO / WARNING / ERROR)
+  retention_days: 90                # 保持日数
+```
+
 ## 技術スタック
 - 文字起こし: faster-whisper
 - 動画処理: FFmpeg + OpenCV + PySceneDetect

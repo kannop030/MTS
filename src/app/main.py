@@ -24,10 +24,20 @@ from app.utils.file_handler import (
     load_settings, generate_job_id, create_job_dirs,
     delete_upload, delete_temp, zip_output, sanitize_filename,
 )
-from app.utils.logger import get_logger
+from app.utils.logger import get_logger, setup_file_logging
+
+settings = load_settings()
+
+# ファイルログを設定（アプリ起動直後に一度だけ実行）
+_log_cfg = settings.get("logging", {})
+setup_file_logging(
+    log_dir=_log_cfg.get("log_dir", "logs"),
+    log_file=_log_cfg.get("log_file", "carol.log"),
+    log_level=_log_cfg.get("log_level", "INFO"),
+    retention_days=int(_log_cfg.get("retention_days", 90)),
+)
 
 logger = get_logger(__name__)
-settings = load_settings()
 
 app = FastAPI(title="Media Transcriber API")
 

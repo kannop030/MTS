@@ -17,10 +17,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from app.utils.file_handler import load_settings
-from app.utils.logger import get_logger
+from app.utils.logger import get_logger, setup_file_logging
 from app.watcher import FolderWatcher
-
-logger = get_logger("watch")
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,6 +58,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     settings = load_settings(args.config)
+
+    # ファイルログを設定
+    _log_cfg = settings.get("logging", {})
+    setup_file_logging(
+        log_dir=_log_cfg.get("log_dir", "logs"),
+        log_file=_log_cfg.get("log_file", "carol.log"),
+        log_level=_log_cfg.get("log_level", "INFO"),
+        retention_days=int(_log_cfg.get("retention_days", 90)),
+    )
+    logger = get_logger("watch")
 
     # CLI 引数で settings を上書き
     watcher_cfg = settings.setdefault("watcher", {})

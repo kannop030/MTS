@@ -37,3 +37,9 @@ watcher:
   language: "ja"                   # 文字起こし言語 (ja / en / auto)
   enable_ocr: false                # スライドOCRを有効にする（動画のみ）
   enable_minutes: false            # 要約・議事録生成を有効にする
+
+logging:
+  log_dir: "logs"                  # ログファイル出力ディレクトリ
+  log_file: "media_transcriber.log" # ログファイル名（日付ローテーション付き）
+  log_level: "INFO"                # ログレベル (DEBUG / INFO / WARNING / ERROR)
+  retention_days: 90               # ログ保持日数（これを超えたファイルは削除）
